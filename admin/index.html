@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>blueming admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;1,9..144,400&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#FBF6EC;--ink:#1C2A4A;--ink-soft:#4A5878;--blue:#5B7FE3;--blue-deep:#3E5BC0;--card:#FFFDF8;--line:rgba(28,42,74,.10);--coral:#FF8A6B;--sage:#74C7A3;--red:#e53e3e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'IBM Plex Sans KR',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+  input,textarea,select{font-family:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:#fff;color:var(--ink);width:100%;outline:none;transition:border .2s}
+  input:focus,textarea:focus{border-color:var(--blue)}
+  textarea{resize:vertical;min-height:60px;line-height:1.5}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:8px;font-weight:600;transition:all .2s}
+
+  /* Gate */
+  #gate{display:flex;align-items:center;justify-content:center;min-height:100vh}
+  .gate-box{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:48px;width:360px;text-align:center}
+  .gate-box h1{font-family:'Fraunces',serif;font-size:32px;font-weight:400;margin-bottom:8px}
+  .gate-box p{font-size:14px;color:var(--ink-soft);margin-bottom:28px}
+  .gate-box input{margin-bottom:14px;text-align:center;font-size:18px;letter-spacing:4px}
+  .gate-box button{width:100%;padding:12px;background:var(--ink);color:#fff;font-size:14px;border-radius:10px}
+  .gate-box button:hover{background:var(--blue-deep)}
+  #gate-err{color:var(--red);font-size:13px;margin-top:10px;display:none}
+
+  /* Panel */
+  #panel{display:none;max-width:860px;margin:0 auto;padding:32px 24px 80px}
+  .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+  .top-bar h1{font-family:'Fraunces',serif;font-weight:400;font-size:26px}
+  .top-bar .actions{display:flex;gap:10px}
+  .btn{padding:9px 18px;font-size:13px;border-radius:9px}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink-soft)}
+  .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+  .btn-primary{background:var(--ink);color:#fff}
+  .btn-primary:hover{background:var(--blue-deep)}
+  .btn-add{background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue-deep);border:1px dashed var(--blue)}
+  .btn-add:hover{background:color-mix(in srgb,var(--blue) 20%,transparent)}
+  .btn-danger{background:transparent;border:1px solid var(--red);color:var(--red)}
+  .btn-danger:hover{background:var(--red);color:#fff}
+
+  /* Project card */
+  .proj-card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin-bottom:14px;transition:box-shadow .2s,opacity .2s}
+  .proj-card:hover{box-shadow:0 4px 20px -8px rgba(28,42,74,.15)}
+  .proj-card.drag-over{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 30%,transparent)}
+  .proj-card.dragging{opacity:.4}
+  .proj-row{display:flex;align-items:center;gap:14px}
+  .drag-handle{color:var(--ink-soft);opacity:.35;cursor:grab;font-size:18px;line-height:1;flex-shrink:0;user-select:none;padding:0 2px}
+  .drag-handle:hover{opacity:.7}
+  .drag-handle:active{cursor:grabbing}
+  .proj-icon{width:40px;height:40px;border-radius:12px;background:rgba(91,127,227,.1);display:grid;place-items:center;font-size:20px;flex-shrink:0}
+  .proj-info{flex:1;min-width:0}
+  .proj-name{font-weight:600;font-size:15px;display:flex;align-items:baseline;gap:8px}
+  .proj-name .en{font-size:12px;color:var(--ink-soft);font-weight:400}
+  .proj-domain{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .proj-controls{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .toggle{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:100px;border:1px solid var(--line);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;background:#fff;color:var(--ink-soft)}
+  .toggle.on.ready{background:color-mix(in srgb,var(--sage) 15%,transparent);border-color:var(--sage);color:#2a8a64}
+  .toggle.on.hidden-tog{background:color-mix(in srgb,var(--coral) 15%,transparent);border-color:var(--coral);color:#c05030}
+  .toggle .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.5}
+  .toggle.on .dot{opacity:1}
+  .btn-edit{padding:6px 14px;background:transparent;border:1px solid var(--line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:8px}
+  .btn-edit:hover{border-color:var(--blue);color:var(--blue)}
+
+  /* Expand fields */
+  .proj-expand{display:none;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+  .proj-expand.open{display:block}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.full{grid-column:1/-1}
+  .field label{font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.04em}
+  .color-row{display:flex;gap:8px;align-items:center}
+  .color-row input[type=color]{width:44px;height:36px;padding:2px;border-radius:8px;cursor:pointer;flex-shrink:0}
+  .color-row input[type=text]{flex:1}
+  .expand-actions{display:flex;justify-content:space-between;margin-top:14px;gap:8px}
+
+  /* Tag list */
+  .proj-badges{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .badge-manual{font-size:10px;font-weight:700;background:color-mix(in srgb,var(--blue) 12%,transparent);color:var(--blue-deep);padding:3px 8px;border-radius:6px}
+  .badge-hidden{font-size:10px;font-weight:700;background:color-mix(in srgb,var(--coral) 12%,transparent);color:var(--coral);padding:3px 8px;border-radius:6px}
+
+  /* Toast */
+  #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+  #toast.show{opacity:1}
+
+  /* Save bar */
+  .save-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(251,246,236,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:14px 24px;display:flex;justify-content:center;gap:12px}
+
+  @media(max-width:600px){.fields{grid-template-columns:1fr}.proj-controls{flex-wrap:wrap}}
+
+  /* Icon upload */
+  .icon-edit-wrap{display:flex;gap:12px;align-items:flex-start}
+  .icon-preview-box{width:52px;height:52px;border-radius:12px;background:rgba(91,127,227,.1);display:grid;place-items:center;font-size:26px;flex-shrink:0;overflow:hidden;border:1px solid var(--line)}
+  .icon-preview-box img{width:52px;height:52px;object-fit:cover}
+  .proj-icon img{width:36px;height:36px;object-fit:cover;border-radius:8px}
+  .upload-zone{display:flex;align-items:center;gap:8px;margin-top:7px;flex-wrap:wrap}
+  .upload-label{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1.5px dashed var(--line);border-radius:8px;cursor:pointer;font-size:12px;color:var(--ink-soft);transition:all .2s}
+  .upload-label:hover{border-color:var(--blue);color:var(--blue)}
+  .btn-screenshot{background:color-mix(in srgb,var(--sage) 12%,transparent);color:#2a7a5a;border:1px solid var(--sage);font-size:12px;padding:5px 11px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .2s}
+  .btn-screenshot:hover{background:color-mix(in srgb,var(--sage) 22%,transparent)}
+  .btn-screenshot:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- Gate -->
+<div id="gate">
+  <div class="gate-box">
+    <h1>blueming</h1>
+    <p>어드민 비밀번호를 입력하세요</p>
+    <input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+    <button onclick="login()">입장</button>
+    <div id="gate-err">비밀번호가 틀렸어요</div>
+  </div>
+</div>
+
+<!-- Panel -->
+<div id="panel">
+  <div class="top-bar">
+    <h1>blueming admin</h1>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+  <div id="proj-list"></div>
+  <div style="height:70px"></div>
+</div>
+
+<!-- Save bar -->
+<div class="save-bar" id="save-bar" style="display:none">
+  <button class="btn btn-add" onclick="addProject()">+ 프로젝트 추가</button>
+  <button class="btn btn-primary" onclick="saveAll()">저장하기</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  let PW = '';
+  let meta = {};
+  let vercelProjects = [];
+  let openKey = null;
+
+  // ── Auth ──────────────────────────────────────────────
+  async function login() {
+    PW = document.getElementById('pw-input').value;
+    const r = await fetch('/api/admin', { headers: { 'x-admin-password': PW } });
+    if (r.status === 401) {
+      document.getElementById('gate-err').style.display = 'block';
+      return;
+    }
+    const d = await r.json();
+    meta = d.meta || {};
+    vercelProjects = d.vercelProjects || [];
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+    document.getElementById('save-bar').style.display = 'flex';
+    render();
+  }
+
+  function logout() {
+    PW = '';
+    meta = {};
+    vercelProjects = [];
+    document.getElementById('gate').style.display = 'flex';
+    document.getElementById('panel').style.display = 'none';
+    document.getElementById('save-bar').style.display = 'none';
+    document.getElementById('pw-input').value = '';
+  }
+
+  // ── Save ──────────────────────────────────────────────
+  async function saveAll() {
+    collectOpen();
+    const r = await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'x-admin-password': PW, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ meta }),
+    });
+    if (r.ok) toast('저장됐어요 ✓');
+    else {
+      const d = await r.json().catch(() => ({}));
+      toast('저장 실패: ' + (d.error || r.status));
+    }
+  }
+
+  // ── Render ────────────────────────────────────────────
+  function allKeys() {
+    const vercelSubdomains = vercelProjects.map((p) => p.domain.replace('.blueming.net', ''));
+    const metaKeys = Object.keys(meta);
+    return [...new Set([...metaKeys, ...vercelSubdomains])];
+  }
+
+  function getVercel(subdomain) {
+    return vercelProjects.find((p) => p.domain.replace('.blueming.net', '') === subdomain);
+  }
+
+  function render() {
+    const list = document.getElementById('proj-list');
+    list.innerHTML = '';
+    allKeys().forEach((key) => {
+      const m = meta[key] || {};
+      const vp = getVercel(key);
+      const domain = vp ? vp.domain : (m.manual ? (m.href || '—') : null);
+      list.appendChild(makeCard(key, m, domain));
+    });
+  }
+
+  function makeCard(key, m, domain) {
+    const div = document.createElement('div');
+    div.className = 'proj-card';
+    div.id = 'card-' + key;
+    div.draggable = true;
+    div.dataset.key = key;
+    div.addEventListener('dragstart', onDragStart);
+    div.addEventListener('dragend', onDragEnd);
+    div.addEventListener('dragover', onDragOver);
+    div.addEventListener('dragleave', onDragLeave);
+    div.addEventListener('drop', onDrop);
+    const isOpen = openKey === key;
+    const iconHtml = /^https?:\/\//.test(m.icon)
+      ? `<img src="${esc(m.icon)}" style="width:36px;height:36px;object-fit:cover;border-radius:8px">`
+      : (m.icon || '🔗');
+    const iconPreview = /^https?:\/\//.test(m.icon)
+      ? `<img src="${esc(m.icon)}">`
+      : (m.icon ? esc(m.icon) : '🔗');
+
+    div.innerHTML = `
+      <div class="proj-row">
+        <span class="drag-handle">⠿</span>
+        <div class="proj-icon">${iconHtml}</div>
+        <div class="proj-info">
+          <div class="proj-name">
+            ${m.title || key}
+            <span class="en">${m.en || ''}</span>
+          </div>
+          <div class="proj-domain">${domain || '도메인 없음'}</div>
+          ${m.hidden ? '<div class="proj-badges"><span class="badge-hidden">숨김</span></div>' : ''}
+          ${m.manual ? '<div class="proj-badges"><span class="badge-manual">수동</span></div>' : ''}
+        </div>
+        <div class="proj-controls">
+          <button class="toggle ready ${m.ready ? 'on' : ''}" onclick="toggleField('${key}','ready')">
+            <span class="dot"></span>${m.ready ? '공개' : '준비 중'}
+          </button>
+          <button class="toggle hidden-tog ${m.hidden ? 'on' : ''}" onclick="toggleField('${key}','hidden')">
+            <span class="dot"></span>${m.hidden ? '숨김' : '노출'}
+          </button>
+          <button class="btn-edit" onclick="toggleExpand('${key}')">편집 ${isOpen ? '▲' : '▼'}</button>
+        </div>
+      </div>
+      <div class="proj-expand ${isOpen ? 'open' : ''}" id="expand-${key}">
+        <div class="fields">
+          <div class="field full"><label>아이콘</label>
+            <div class="icon-edit-wrap">
+              <div class="icon-preview-box" id="f-icon-preview-${key}">${iconPreview}</div>
+              <div style="flex:1">
+                <input id="f-icon-${key}" value="${esc(m.icon||'')}" placeholder="이모지 또는 이미지 URL" oninput="updateIconPreview('${key}')">
+                <div class="upload-zone">
+                  <label class="upload-label" for="f-icon-file-${key}">📁 이미지 선택<input type="file" id="f-icon-file-${key}" accept="image/*" style="display:none" onchange="onIconFileChange('${key}')"></label>
+                  <span id="f-icon-status-${key}" style="font-size:12px;color:var(--ink-soft)"></span>
+                  <button id="f-icon-upload-btn-${key}" class="btn btn-ghost" style="display:none;font-size:12px;padding:5px 10px" onclick="uploadIconFile('${key}')">업로드</button>
+                  <button class="btn-screenshot" onclick="captureScreenshot('${key}', this)">📸 스크린샷</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field"><label>태그</label><input id="f-tag-${key}" value="${esc(m.tag||'')}"></div>
+          <div class="field full"><label>상태 배지 텍스트 (비워두면 "준비 중")</label><input id="f-status-${key}" placeholder="예: 베타, 개발 중, 출시예정, Coming soon" value="${esc(m.status||'')}"></div>
+          <div class="field"><label>제목 (한글)</label><input id="f-title-${key}" value="${esc(m.title||'')}"></div>
+          <div class="field"><label>영문 레이블</label><input id="f-en-${key}" value="${esc(m.en||'')}"></div>
+          <div class="field full"><label>설명 (한국어)</label><textarea id="f-desc-ko-${key}">${esc(m.desc?.ko||'')}</textarea></div>
+          <div class="field full"><label>설명 (English)</label><textarea id="f-desc-en-${key}">${esc(m.desc?.en||'')}</textarea></div>
+          <div class="field full"><label>강조 색상</label>
+            <div class="color-row">
+              <input type="color" id="f-color-pick-${key}" value="${m.accent||'#5B7FE3'}" oninput="document.getElementById('f-color-${key}').value=this.value">
+              <input type="text" id="f-color-${key}" value="${esc(m.accent||'#5B7FE3')}" oninput="document.getElementById('f-color-pick-${key}').value=this.value">
+            </div>
+          </div>
+          ${m.manual ? `<div class="field full"><label>URL (수동 프로젝트)</label><input id="f-href-${key}" value="${esc(m.href||'')}"></div>` : ''}
+        </div>
+        <div class="expand-actions">
+          <button class="btn btn-danger" onclick="deleteProject('${key}')">삭제</button>
+          <button class="btn btn-primary" onclick="applyEdit('${key}')">적용</button>
+        </div>
+      </div>`;
+    return div;
+  }
+
+  function toggleExpand(key) {
+    collectOpen();
+    openKey = openKey === key ? null : key;
+    render();
+  }
+
+  function toggleField(key, field) {
+    if (!meta[key]) meta[key] = {};
+    meta[key][field] = !meta[key][field];
+    render();
+  }
+
+  function applyEdit(key) {
+    if (!meta[key]) meta[key] = {};
+    const m = meta[key];
+    m.icon = val(`f-icon-${key}`);
+    m.tag = val(`f-tag-${key}`);
+    m.title = val(`f-title-${key}`);
+    m.en = val(`f-en-${key}`);
+    m.desc = { ko: val(`f-desc-ko-${key}`), en: val(`f-desc-en-${key}`) };
+    m.accent = val(`f-color-${key}`);
+    m.status = val(`f-status-${key}`) || null;
+    if (m.manual) m.href = val(`f-href-${key}`);
+    openKey = null;
+    render();
+    toast('편집 적용됨 (저장하기 누르면 반영돼요)');
+  }
+
+  function collectOpen() {
+    if (!openKey) return;
+    applyEdit(openKey);
+  }
+
+  function deleteProject(key) {
+    if (!confirm(`"${key}" 프로젝트를 삭제할까요?\n\nVercel 프로젝트는 API에서 계속 감지되므로\n다음 번에 다시 나타날 수 있어요.`)) return;
+    delete meta[key];
+    openKey = null;
+    render();
+  }
+
+  function addProject() {
+    const key = prompt('새 프로젝트의 키(subdomain)를 입력하세요\n예: myproject');
+    if (!key || !key.trim()) return;
+    const k = key.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    if (meta[k]) { toast('이미 있는 키예요'); return; }
+    meta[k] = {
+      icon: '🔗', title: k, en: '', desc: { ko: '', en: '' },
+      tag: 'Project', accent: '#5B7FE3', ready: false, hidden: false, manual: true, href: '',
+    };
+    openKey = k;
+    render();
+    document.getElementById('card-' + k)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // ── Drag & Drop ──────────────────────────────────────
+  let dragKey = null;
+
+  function onDragStart(e) {
+    collectOpen();
+    dragKey = this.dataset.key;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => this.classList.add('dragging'), 0);
+  }
+
+  function onDragEnd() {
+    this.classList.remove('dragging');
+    document.querySelectorAll('.proj-card').forEach(c => c.classList.remove('drag-over'));
+    dragKey = null;
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (this.dataset.key !== dragKey) this.classList.add('drag-over');
+  }
+
+  function onDragLeave() {
+    this.classList.remove('drag-over');
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    const targetKey = this.dataset.key;
+    if (!dragKey || dragKey === targetKey) return;
+
+    const keys = Object.keys(meta);
+    const from = keys.indexOf(dragKey);
+    const to = keys.indexOf(targetKey);
+    if (from === -1 || to === -1) return;
+
+    keys.splice(from, 1);
+    keys.splice(to, 0, dragKey);
+
+    const reordered = {};
+    keys.forEach(k => { reordered[k] = meta[k]; });
+    meta = reordered;
+    render();
+  }
+
+  // ── Helpers ───────────────────────────────────────────
+  function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+  // ── Icon upload & screenshot ──────────────────────────
+  function updateIconPreview(key) {
+    const v = document.getElementById(`f-icon-${key}`)?.value || '';
+    const box = document.getElementById(`f-icon-preview-${key}`);
+    if (!box) return;
+    if (/^https?:\/\//.test(v)) {
+      box.innerHTML = `<img src="${esc(v)}" onerror="this.outerHTML='🖼'">`;
+    } else {
+      box.textContent = v || '🔗';
+    }
+  }
+
+  function onIconFileChange(key) {
+    const file = document.getElementById(`f-icon-file-${key}`)?.files[0];
+    if (!file) return;
+    const status = document.getElementById(`f-icon-status-${key}`);
+    const btn = document.getElementById(`f-icon-upload-btn-${key}`);
+    if (status) status.textContent = file.name;
+    if (btn) btn.style.display = '';
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const box = document.getElementById(`f-icon-preview-${key}`);
+      if (box) box.innerHTML = `<img src="${e.target.result}">`;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadIconFile(key) {
+    const file = document.getElementById(`f-icon-file-${key}`)?.files[0];
+    if (!file) return;
+    const btn = document.getElementById(`f-icon-upload-btn-${key}`);
+    const status = document.getElementById(`f-icon-status-${key}`);
+    btn.disabled = true;
+    btn.textContent = '업로드 중...';
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      const filename = `icon-${key}-${Date.now()}.${ext}`;
+      const r = await fetch('/api/upload-icon', {
+        method: 'POST',
+        headers: { 'x-admin-password': PW, 'Content-Type': file.type, 'x-filename': filename },
+        body: file,
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '업로드 실패');
+      document.getElementById(`f-icon-${key}`).value = d.url;
+      btn.style.display = 'none';
+      if (status) status.textContent = '완료 ✓';
+      toast('아이콘 이미지 업로드 완료!');
+    } catch (err) {
+      toast('업로드 실패: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = '업로드';
+    }
+  }
+
+  async function captureScreenshot(key, btn) {
+    const vp = getVercel(key);
+    const m = meta[key] || {};
+    const target = vp ? `https://${vp.domain}` : m.href;
+    if (!target) { toast('URL이 없어요. 먼저 URL을 설정하세요.'); return; }
+    btn.disabled = true;
+    btn.textContent = '캡처 중...';
+    try {
+      const r = await fetch(`/api/screenshot?target=${encodeURIComponent(target)}&key=${encodeURIComponent(key)}`, {
+        headers: { 'x-admin-password': PW },
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || '캡처 실패');
+      document.getElementById(`f-icon-${key}`).value = d.url;
+      updateIconPreview(key);
+      toast('스크린샷 캡처 완료!');
+    } catch (err) {
+      toast('캡처 실패: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '📸 스크린샷';
+    }
+  }
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  document.getElementById('pw-input').focus();
+</script>
+</body>
+</html>

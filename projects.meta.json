@@ -1,0 +1,74 @@
+{
+  "capitolwatch": {
+    "icon": "🏛️",
+    "title": "CapitolWatch",
+    "en": "Policy",
+    "desc": {
+      "ko": "",
+      "en": ""
+    },
+    "tag": "Project",
+    "accent": "#5B7FE3",
+    "ready": false
+  },
+  "productpage": {
+    "icon": "📄",
+    "title": "Introduction",
+    "en": "About",
+    "desc": {
+      "ko": "",
+      "en": ""
+    },
+    "tag": "Project",
+    "accent": "#74C7A3",
+    "ready": false
+  },
+  "myportfolio": {
+    "icon": "📈",
+    "title": "K-Stock",
+    "en": "Stock Data",
+    "desc": {
+      "ko": "한국 증시 데이터와 지표를 한눈에. 종목·시장 흐름을 가볍게 추적합니다.",
+      "en": "Korean market data and indicators at a glance. Track tickers and trends with ease."
+    },
+    "tag": "KR / EN",
+    "accent": "#5B7FE3",
+    "ready": false
+  },
+  "reports": {
+    "icon": "📰",
+    "title": "리포트",
+    "en": "Daily Report",
+    "desc": {
+      "ko": "매일 정리하는 한국 증권 리포트. 핵심만 짧게, 영어판도 함께 발행.",
+      "en": "A daily Korean stock report. Concise highlights, published in English too."
+    },
+    "tag": "KR / EN",
+    "accent": "#3E5BC0",
+    "ready": false
+  },
+  "talentsync": {
+    "icon": "🤝",
+    "title": "RecruitMatch",
+    "en": "Recruiting",
+    "desc": {
+      "ko": "AI 기반 채용 매칭 플랫폼. 후보와 포지션을 똑똑하게 연결합니다.",
+      "en": "An AI-powered hiring platform that smartly matches candidates to roles."
+    },
+    "tag": "Service",
+    "accent": "#74C7A3",
+    "ready": false
+  },
+  "plotbranch": {
+    "icon": "🌿",
+    "title": "PlotBranch",
+    "en": "Writing",
+    "desc": {
+      "ko": "웹소설 작가를 위한 Git 스타일 플롯 관리 도구. 이야기의 가지를 친다.",
+      "en": "A Git-style plot manager for web-novel writers. Branch your story."
+    },
+    "tag": "Tool",
+    "accent": "#FF8A6B",
+    "ready": false
+  }
+}
