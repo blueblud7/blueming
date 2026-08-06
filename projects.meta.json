@@ -1,16 +1,4 @@
 {
-  "capitolwatch": {
-    "icon": "🏛️",
-    "title": "CapitolWatch",
-    "en": "Policy",
-    "desc": {
-      "ko": "",
-      "en": ""
-    },
-    "tag": "Project",
-    "accent": "#5B7FE3",
-    "ready": false
-  },
   "productpage": {
     "icon": "📄",
     "title": "Introduction",
