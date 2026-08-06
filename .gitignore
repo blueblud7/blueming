@@ -1,1 +1,4 @@
 public/index.html
+.env.local
+.env.production
+.vercel/
