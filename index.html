@@ -1,214 +1,52 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>blueming</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --paper:#FBF6EC; --ink:#1C2A4A; --ink-soft:#4A5878;
-    --blue:#5B7FE3; --blue-deep:#3E5BC0; --sky:#A8C5F5;
-    --coral:#FF8A6B; --peach:#FFC9A8; --sage:#74C7A3;
-    --card:#FFFDF8; --line:rgba(28,42,74,.10);
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{font-family:'IBM Plex Sans KR',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden;position:relative;-webkit-font-smoothing:antialiased}
-
-  .mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
-  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:drift 22s ease-in-out infinite}
-  .blob.b1{width:46vw;height:46vw;background:radial-gradient(circle,#A8C5F5,transparent 70%);top:-12vw;left:-8vw}
-  .blob.b2{width:38vw;height:38vw;background:radial-gradient(circle,#FFC9A8,transparent 70%);bottom:-10vw;right:-6vw;animation-delay:-7s}
-  .blob.b3{width:30vw;height:30vw;background:radial-gradient(circle,#A6E3C9,transparent 70%);top:38%;left:42%;animation-delay:-13s;opacity:.4}
-  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(3vw,-2vw) scale(1.08)}66%{transform:translate(-2vw,3vw) scale(.95)}}
-  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-
-  .wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:0 28px}
-
-  header{display:flex;justify-content:space-between;align-items:center;padding:34px 0 0}
-  .logo{font-family:'Fraunces',serif;font-weight:600;font-size:24px;letter-spacing:-.5px;display:flex;align-items:center;gap:9px}
-  .logo .dot{width:11px;height:11px;border-radius:50%;background:var(--coral);box-shadow:0 0 0 4px rgba(255,138,107,.18);animation:pulse 3.2s ease-in-out infinite}
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.8}}
-  .navwrap{display:flex;align-items:center;gap:26px}
-  nav{display:flex;gap:26px;font-size:14px;font-weight:500}
-  nav a{color:var(--ink-soft);text-decoration:none;transition:color .2s}
-  nav a:hover{color:var(--blue-deep)}
-
-  .lang{display:inline-flex;align-items:center;background:rgba(28,42,74,.06);border-radius:100px;padding:3px;font-size:13px;font-weight:600}
-  .lang button{border:none;background:transparent;color:var(--ink-soft);padding:5px 12px;border-radius:100px;cursor:pointer;transition:all .25s;font-family:inherit;font-weight:600;font-size:13px}
-  .lang button.on{background:var(--card);color:var(--blue-deep);box-shadow:0 1px 4px rgba(28,42,74,.12)}
-
-  .hero{padding:14vh 0 8vh;max-width:760px}
-  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--blue-deep);background:rgba(91,127,227,.10);padding:7px 15px;border-radius:100px;margin-bottom:30px}
-  .eyebrow .sprout{width:7px;height:7px;border-radius:50%;background:var(--sage)}
-  h1{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(48px,8vw,86px);line-height:.98;letter-spacing:-1.5px;margin-bottom:26px}
-  h1 .em{font-style:italic;color:var(--blue);position:relative}
-  h1 .word{display:inline-block;opacity:0;animation:rise .8s forwards}
-  h1 .word:nth-child(1){animation-delay:.18s}
-  h1 .word:nth-child(2){animation-delay:.30s}
-  .lead{font-size:clamp(17px,2.4vw,20px);line-height:1.7;color:var(--ink-soft);max-width:540px;font-weight:300}
-  .lead b{font-weight:500;color:var(--ink)}
-  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-
-  .swap{transition:opacity .25s ease}
-  .swap.fading{opacity:0}
-
-  .seclabel{display:flex;align-items:center;gap:16px;margin:0 0 30px;font-size:13px;font-weight:600;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase}
-  .seclabel .ln{flex:1;height:1px;background:var(--line)}
-
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:20px;padding-bottom:8vh;min-height:240px}
-  .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px 28px 26px;text-decoration:none;color:inherit;overflow:hidden;display:flex;flex-direction:column;min-height:200px;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s;opacity:0;animation:rise .7s forwards}
-  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--accent,var(--blue));transform:scaleX(0);transform-origin:left;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
-  .card::after{content:'';position:absolute;right:-40px;bottom:-40px;width:130px;height:130px;border-radius:50%;background:var(--accent,var(--blue));opacity:.07;transition:transform .45s ease,opacity .45s}
-  .card:hover{transform:translateY(-7px);box-shadow:0 22px 44px -20px rgba(28,42,74,.28);border-color:transparent}
-  .card:hover::before{transform:scaleX(1)}
-  .card:hover::after{transform:scale(1.6);opacity:.12}
-  .card .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--accent,var(--blue)) 14%,transparent);margin-bottom:18px}
-  .card h3{font-family:'Fraunces',serif;font-weight:500;font-size:21px;letter-spacing:-.3px;margin-bottom:3px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-  .card h3 .en{font-family:'IBM Plex Sans KR';font-size:12px;font-weight:500;color:var(--ink-soft);letter-spacing:.02em}
-  .card p{font-size:14px;line-height:1.62;color:var(--ink-soft);font-weight:300;margin-top:6px;flex:1}
-  .card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
-  .tag{font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--accent,var(--blue));background:color-mix(in srgb,var(--accent,var(--blue)) 11%,transparent);padding:5px 10px;border-radius:7px}
-  .arrow{font-size:18px;color:var(--accent,var(--blue));transition:transform .3s}
-  .card:hover .arrow{transform:translate(4px,-4px)}
-
-  /* not-ready state */
-  .card.pending{cursor:default}
-  .card.pending:hover{transform:none;box-shadow:0 4px 12px -8px rgba(28,42,74,.2)}
-  .card.pending:hover::before{transform:scaleX(0)}
-  .card.pending:hover::after{transform:none;opacity:.07}
-  .card.pending .ic,.card.pending h3,.card.pending p{opacity:.55}
-  .badge{position:absolute;top:18px;right:18px;font-size:10px;font-weight:700;letter-spacing:.06em;color:#fff;background:var(--accent,var(--blue));padding:4px 9px;border-radius:100px;opacity:.9;display:flex;align-items:center;gap:5px}
-  .badge .pip{width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 2s ease-in-out infinite}
-  .card.pending .arrow{opacity:.3}
-
-  .card.soon{background:transparent;border-style:dashed;border-color:rgba(28,42,74,.16);align-items:center;justify-content:center;text-align:center;cursor:default}
-  .card.soon:hover{transform:none;box-shadow:none;border-color:rgba(28,42,74,.28)}
-  .card.soon::before,.card.soon::after{display:none}
-  .card.soon .plus{font-size:30px;color:var(--ink-soft);opacity:.5;margin-bottom:8px}
-  .card.soon p{flex:none;text-align:center}
-
-  footer{border-top:1px solid var(--line);padding:36px 0 56px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px}
-  .flinks{display:flex;gap:22px;font-size:14px;font-weight:500}
-  .flinks a{color:var(--ink-soft);text-decoration:none;transition:color .2s}
-  .flinks a:hover{color:var(--coral)}
-  .copy{font-size:13px;color:var(--ink-soft);opacity:.7;font-weight:300}
-
-  .loading{grid-column:1/-1;text-align:center;color:var(--ink-soft);opacity:.5;font-size:14px;font-weight:300;padding:40px 0}
-
-  @media(max-width:600px){nav{display:none}.hero{padding:9vh 0 6vh}footer{flex-direction:column;align-items:flex-start}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="쓰고, 생각하고, 피어나는 기록. blueming의 블로그입니다.">
+  <meta property="og:title" content="blueming — 쓰고, 생각하고, 피어나는 기록">
+  <meta property="og:description" content="기록과 생각, 그리고 천천히 피어나는 것들.">
+  <meta property="og:image" content="/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>blueming — 기록의 정원</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--paper:#faf7f0;--surface:#fffdf8;--ink:#18233e;--soft:#68718a;--blue:#254a9b;--pale:#e7edfb;--coral:#ed765f;--line:#e7e1d6;--serif:'Fraunces','IBM Plex Sans KR',serif;--sans:'IBM Plex Sans KR',sans-serif}
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}.page{max-width:1120px;margin:auto;padding:0 32px}.top{display:flex;align-items:center;justify-content:space-between;padding:28px 0;border-bottom:1px solid var(--line)}
+    .brand{display:flex;gap:10px;align-items:center;text-decoration:none;color:inherit;font-family:var(--serif);font-size:25px;font-weight:500;letter-spacing:-1px}.brand i{display:block;width:11px;height:11px;border-radius:50%;background:var(--coral);box-shadow:0 0 0 5px #fbe0da} nav{display:flex;gap:28px}nav a{color:var(--soft);text-decoration:none;font-size:14px;font-weight:500}nav a:hover{color:var(--blue)}
+    .hero{padding:105px 0 92px;display:grid;grid-template-columns:1.25fr .75fr;gap:60px;align-items:end}.kicker{font:500 11px 'DM Mono',monospace;color:var(--blue);letter-spacing:.1em;text-transform:uppercase}.hero h1{font-family:var(--serif);font-size:clamp(48px,7vw,82px);line-height:1.04;letter-spacing:-3px;font-weight:400;margin:18px 0 24px}.hero h1 em{font-style:italic;color:var(--blue)}.hero p{font-size:17px;line-height:1.85;color:var(--soft);max-width:510px;word-break:keep-all}.now{padding:24px;border:1px solid var(--line);background:var(--surface);border-radius:2px;position:relative}.now:before{content:'NOW';font:500 10px 'DM Mono',monospace;color:var(--coral);letter-spacing:.12em}.now p{font-size:15px;line-height:1.7;margin:13px 0 0;color:var(--ink)}
+    .section-head{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-top:1px solid var(--ink);border-bottom:1px solid var(--line)}.section-head h2{font-size:13px;margin:0;letter-spacing:.1em;text-transform:uppercase}.section-head span{font:12px 'DM Mono',monospace;color:var(--soft)}
+    .featured{display:grid;grid-template-columns:1.08fr .92fr;border-bottom:1px solid var(--line)}.featured-cover{min-height:410px;padding:38px;background:linear-gradient(145deg,#dce7ff,#f1f4ff 52%,#fde2da);position:relative;overflow:hidden}.featured-cover:after{content:'✦';position:absolute;right:11%;bottom:6%;font-size:150px;color:rgba(37,74,155,.13);font-family:var(--serif)}.cover-label{font:500 11px 'DM Mono',monospace;letter-spacing:.1em;color:var(--blue)}.featured-copy{padding:52px 50px;display:flex;flex-direction:column;align-items:flex-start}.meta{font:12px 'DM Mono',monospace;color:var(--soft);letter-spacing:.02em}.featured h3{font:400 clamp(29px,3.6vw,46px)/1.15 var(--serif);letter-spacing:-1.6px;margin:20px 0}.excerpt{font-size:15px;color:var(--soft);line-height:1.8;word-break:keep-all}.read{margin-top:auto;padding-top:30px;color:var(--blue);border:0;background:transparent;font:600 13px var(--sans);cursor:pointer}.read:hover{color:var(--coral)}
+    .writing{padding-top:86px}.post-list{border-top:1px solid var(--ink)}.post{width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;padding:30px 0;display:grid;grid-template-columns:120px 1fr auto;gap:26px;text-align:left;align-items:center;cursor:pointer;color:inherit}.post:hover h3{color:var(--blue);transform:translateX(5px)}.post .kind{font:11px 'DM Mono',monospace;color:var(--coral);letter-spacing:.06em}.post h3{font:400 27px var(--serif);letter-spacing:-.7px;margin:0 0 8px;transition:.25s}.post p{font-size:14px;color:var(--soft);margin:0;line-height:1.6}.post time{font:12px 'DM Mono',monospace;color:var(--soft)}
+    .letter{margin:100px 0 62px;padding:50px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center;background:var(--ink);color:#fff}.letter h2{font:400 38px var(--serif);letter-spacing:-1px;margin:0 0 12px}.letter p{margin:0;color:#c7cede;font-size:14px;line-height:1.7}.letter form{display:flex;border-bottom:1px solid #9ca9c6;padding-bottom:7px}.letter input{width:190px;border:0;outline:0;background:transparent;color:#fff;font:14px var(--sans)}.letter input::placeholder{color:#9ca9c6}.letter button{border:0;background:transparent;color:#fff;font:500 12px 'DM Mono',monospace;cursor:pointer}footer{padding:25px 0 45px;display:flex;justify-content:space-between;color:var(--soft);font-size:12px}footer a{color:inherit;text-decoration:none}
+    dialog{border:0;padding:0;background:transparent;width:min(680px,calc(100% - 32px);max-height:calc(100vh - 50px)}dialog::backdrop{background:rgba(24,35,62,.52);backdrop-filter:blur(3px)}.article{position:relative;background:var(--surface);padding:54px 58px;box-shadow:0 20px 60px rgba(24,35,62,.2)}.close{position:absolute;top:17px;right:18px;border:0;background:transparent;font-size:24px;color:var(--soft);cursor:pointer}.article h2{font:400 42px/1.16 var(--serif);letter-spacing:-1.4px;margin:18px 0 28px}.article .body{font-size:16px;line-height:2;color:#43506b;white-space:pre-line;word-break:keep-all}
+    @media(max-width:720px){.page{padding:0 20px}nav{gap:15px}.hero{grid-template-columns:1fr;padding:70px 0 58px;gap:35px}.hero h1{letter-spacing:-2px}.featured{grid-template-columns:1fr}.featured-cover{min-height:220px}.featured-copy{padding:34px 25px;min-height:300px}.post{grid-template-columns:1fr;gap:8px}.post time{display:none}.letter{margin:65px 0 42px;padding:35px 26px;grid-template-columns:1fr}.letter h2{font-size:32px}.article{padding:48px 28px}.article h2{font-size:34px}footer{flex-direction:column;gap:8px}}
+  </style>
 </head>
 <body>
-  <div class="mesh"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
-  <div class="grain"></div>
-
-  <div class="wrap">
-    <header>
-      <div class="logo"><span class="dot"></span>blueming</div>
-      <div class="navwrap">
-        <nav>
-          <a href="#works" data-i="nav_works">Works</a>
-          <a href="#">Brunch</a>
-          <a href="#">Telegram</a>
-        </nav>
-        <div class="lang">
-          <button id="btn-ko" class="on" onclick="setLang('ko')">KR</button>
-          <button id="btn-en" onclick="setLang('en')">EN</button>
-        </div>
-      </div>
-    </header>
-
-    <section class="hero">
-      <span class="eyebrow"><span class="sprout"></span><span class="swap" data-i="eyebrow"></span></span>
-      <h1><span class="word">blue</span><span class="word em">ming.</span></h1>
-      <p class="lead swap" data-i="lead"></p>
-    </section>
-
-    <section id="works">
-      <div class="seclabel"><span data-i="works_label">WORKS</span> <span class="ln"></span> <span id="count"></span></div>
-      <div class="grid" id="grid"><div class="loading">불러오는 중…</div></div>
-    </section>
-
-    <footer>
-      <div class="flinks">
-        <a href="#">Brunch ↗</a>
-        <a href="#">Telegram ↗</a>
-        <a href="#">GitHub ↗</a>
-      </div>
-      <div class="copy" data-i="copy"></div>
-    </footer>
-  </div>
-
-<script>
-  let lang = 'ko';
-  let DATA = { ui:{ko:{},en:{}}, projects:[] };
-
-  const grid = document.getElementById('grid');
-
-  function renderCards(){
-    grid.innerHTML='';
-    DATA.projects.forEach((p,i)=>{
-      const ready = p.ready === true;
-      const el = document.createElement('a');
-      el.className = 'card' + (ready ? '' : ' pending');
-      el.href = p.href;
-      el.target = '_blank';
-      el.rel = 'noopener noreferrer';
-      el.style.setProperty('--accent', p.accent || '#5B7FE3');
-      el.style.animationDelay = (0.1 + i*0.08)+'s';
-      const badgeText = p.status || DATA.ui[lang].badge_soon || '준비 중';
-      const badge = ready ? '' :
-        `<span class="badge"><span class="pip"></span>${badgeText}</span>`;
-      el.innerHTML = `
-        ${badge}
-        <div class="ic">${p.icon||'•'}</div>
-        <h3>${p.title||''} <span class="en">${p.en||''}</span></h3>
-        <p>${(p.desc&&p.desc[lang])||''}</p>
-        <div class="foot"><span class="tag">${p.tag||''}</span><span class="arrow">↗</span></div>`;
-      grid.appendChild(el);
-    });
-    // coming soon 카드
-    const soon=document.createElement('div');
-    soon.className='card soon';
-    soon.style.animationDelay=(0.1 + DATA.projects.length*0.08)+'s';
-    soon.innerHTML=`<div class="plus">+</div><p>${DATA.ui[lang].soon||''}</p>`;
-    grid.appendChild(soon);
-
-    document.getElementById('count').textContent =
-      '0'+DATA.projects.filter(p=>p.ready).length+' / 0'+DATA.projects.length;
-  }
-
-  function applyText(){
-    document.querySelectorAll('[data-i]').forEach(el=>{
-      const k = el.getAttribute('data-i');
-      const v = DATA.ui[lang][k];
-      if(v!==undefined) el.innerHTML = v;
-    });
-  }
-
-  function setLang(l){
-    if(l===lang) return;
-    lang=l;
-    document.getElementById('btn-ko').classList.toggle('on', l==='ko');
-    document.getElementById('btn-en').classList.toggle('on', l==='en');
-    document.documentElement.lang=l;
-    const fades=document.querySelectorAll('.swap');
-    fades.forEach(f=>f.classList.add('fading'));
-    setTimeout(()=>{ applyText(); renderCards(); fades.forEach(f=>f.classList.remove('fading')); },200);
-  }
-
-  // 프로젝트 목록 불러오기 (Vercel API 실시간 연동)
-  fetch('/api/projects', {cache:'no-store'})
-    .then(r=>r.json())
-    .then(d=>{ DATA=d; applyText(); renderCards(); })
-    .catch(err=>{
-      grid.innerHTML='<div class="loading">프로젝트를 불러오지 못했어요.</div>';
-      console.error('projects API failed:', err);
-    });
-</script>
+  <main class="page">
+    <header class="top"><a class="brand" href="#top"><i></i>blueming</a><nav><a href="#writing">글</a><a href="#about">소개</a><a href="#letter">편지</a></nav></header>
+    <section class="hero" id="top"><div><div class="kicker">A quiet place for notes</div><h1>쓰고, 생각하고,<br><em>피어나는</em> 기록.</h1><p>일과 삶 사이에서 오래 들여다본 것들을 씁니다. 가볍게 시작한 생각이 한 편의 글이 되고, 그 글이 다음의 질문으로 이어지기를 바랍니다.</p></div><aside class="now"><p><strong>지금 쓰는 중</strong><br>좋은 도구는 시간을 아껴주지만, 좋은 질문은 시간을 넓혀준다. 요즘은 이 둘 사이의 균형에 대해 기록하고 있어요.</p></aside></section>
+    <div class="section-head"><h2>Latest note</h2><span>01 / 04</span></div>
+    <section class="featured"><div class="featured-cover"><div class="cover-label">ESSAY · 2026.08.06</div></div><div class="featured-copy"><div class="meta">THINKING · 6 MIN READ</div><h3>일을 잘한다는 말의<br>조금 다른 뜻</h3><p class="excerpt">일을 잘하는 사람은 답을 빨리 내는 사람일까, 아니면 더 좋은 질문을 남기는 사람일까. 성과와 여백 사이에서 오래 일하며 배운 몇 가지를 적어본다.</p><button class="read" data-post="0">글 읽기 →</button></div></section>
+    <section class="writing" id="writing"><div class="section-head"><h2>All writing</h2><span>천천히 쌓이는 글들</span></div><div class="post-list" id="post-list"></div></section>
+    <section class="letter" id="letter"><div><h2>가끔, 편지를 보낼게요.</h2><p>새 글과 오래 남은 생각을 한 달에 한두 번 전합니다.</p></div><form onsubmit="subscribe(event)"><input type="email" placeholder="email@example.com" required aria-label="이메일 주소"><button type="submit">SUBSCRIBE ↗</button></form></section>
+    <footer id="about"><span>© 2026 blueming. made slowly.</span><a href="mailto:hello@blueming.net">hello@blueming.net</a></footer>
+  </main>
+  <dialog id="article-dialog"><article class="article"><button class="close" aria-label="닫기" onclick="articleDialog.close()">×</button><div class="meta" id="dialog-meta"></div><h2 id="dialog-title"></h2><div class="body" id="dialog-body"></div></article></dialog>
+  <script>
+    const posts=[
+      {kind:'ESSAY',date:'2026.08.06',title:'일을 잘한다는 말의 조금 다른 뜻',excerpt:'성과와 여백 사이에서 오래 일하며 배운 몇 가지.',body:'일을 잘한다는 말은 대개 속도와 정확함을 가리킨다. 틀리지 않고, 늦지 않고, 기대보다 조금 더 멀리 가는 것.\n\n그런데 시간이 지날수록 좋은 일은 답을 빨리 내는 데서 시작되지 않는다는 생각을 한다. 함께 일하는 사람들이 더 좋은 질문을 할 수 있게 만드는 일, 아직 이름 없는 문제를 발견해내는 일도 그만큼 중요하다.\n\n속도는 결과를 만든다. 하지만 질문은 방향을 만든다. 나는 요즘 그 둘 사이에 조금 더 넓은 자리를 남겨두려 한다.'},
+      {kind:'NOTE',date:'2026.07.24',title:'좋아하는 일을 오래 하기 위해',excerpt:'지속할 수 있는 리듬은 의지보다 먼저 설계되어야 한다.',body:'좋아하는 일도 매일 좋아할 수는 없다. 그렇기에 오래 하는 사람들은 의지보다 리듬을 먼저 만든다.\n\n무리한 하루 뒤에는 비어 있는 하루를 두고, 완벽한 초안 대신 다음에 돌아올 수 있는 문장을 남긴다. 지속은 뜨거운 마음보다 돌아갈 자리를 만드는 기술에 가깝다.'},
+      {kind:'WORKING NOTE',date:'2026.07.08',title:'AI와 함께 일할 때 남겨야 할 것',excerpt:'더 빠르게 만들 수 있는 시대에, 나만의 판단을 지키는 법.',body:'도구가 초안을 써줄수록 사람에게 남는 일은 판단이다. 무엇을 덜어낼지, 어떤 문장이 우리다운지, 지금 이 문제를 풀어야 하는지.\n\nAI는 생각의 출발점을 풍성하게 할 수 있다. 하지만 마지막에 남아야 하는 것은 선택의 이유다. 그 이유가 쌓여야 비로소 내 작업이 된다.'},
+      {kind:'LETTER',date:'2026.06.19',title:'작은 프로젝트를 공개하는 마음',excerpt:'완벽해질 때까지 기다리지 않기로 한 기록.',body:'작은 프로젝트를 세상에 내놓을 때는 늘 조금 부끄럽다. 아직 모자란 곳이 먼저 보이기 때문이다.\n\n하지만 공개는 끝이 아니라 대화의 시작이다. 누군가의 작은 반응 하나가 다음 버전의 방향을 알려주기도 한다. 그래서 오늘도 덜 완벽한 것을 조심스럽게 꺼내놓는다.'}
+    ];
+    const list=document.getElementById('post-list'),articleDialog=document.getElementById('article-dialog');
+    list.innerHTML=posts.slice(1).map((p,i)=>`<button class="post" data-post="${i+1}"><span class="kind">${p.kind}</span><span><h3>${p.title}</h3><p>${p.excerpt}</p></span><time>${p.date}</time></button>`).join('');
+    document.addEventListener('click',e=>{const button=e.target.closest('[data-post]');if(!button)return;const p=posts[button.dataset.post];document.getElementById('dialog-meta').textContent=`${p.kind} · ${p.date}`;document.getElementById('dialog-title').textContent=p.title;document.getElementById('dialog-body').textContent=p.body;articleDialog.showModal()});
+    function subscribe(event){event.preventDefault();const button=event.currentTarget.querySelector('button');button.textContent='THANK YOU ✓';event.currentTarget.querySelector('input').value='';}
+  </script>
 </body>
 </html>
