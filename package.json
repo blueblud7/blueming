@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "vercel-build": "mkdir -p public && cp index.html public/index.html"
+    "vercel-build": "mkdir -p public/admin && cp index.html public/index.html && cp admin/index.html public/admin/index.html && cp admin/blog.html public/admin/blog.html"
   },
   "dependencies": {
     "@vercel/blob": "^0.27.0"
