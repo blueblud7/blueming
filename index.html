@@ -41,10 +41,35 @@
     const escapeHtml=value=>String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const renderMarkdown=value=>escapeHtml(value).split(/\n\n+/).map(part=>{let html=part.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline;">$1 ↗</a>');return part.startsWith('## ')?`<h2>${html.slice(3)}</h2>`:`<p>${html}</p>`;}).join('');
     function renderRemote(remote){
-      const item=i=>`<a class="entry" href="?post=${encodeURIComponent(i.id)}"><div class="stamp"><b>${escapeHtml(i.category)}</b>${escapeHtml(i.date)}</div><div><h2>${escapeHtml(i.title)}</h2><p>${escapeHtml(i.excerpt)}</p></div></a>`;
+      const item=p=>`<a class="entry" href="?post=${encodeURIComponent(p.id)}"><div class="stamp"><b>${escapeHtml(p.category)}</b>${escapeHtml(p.date)}</div><div><h2>${escapeHtml(p.title)}</h2><p>${escapeHtml(p.excerpt)}</p></div></a>`;
       const all=params.get('view')==='all', postId=params.get('post');
-      if(postId){const p=remote.find(x=>x.id===postId);if(!p)return;document.getElementById('home').hidden=true;document.getElementById('post-view').hidden=false;document.getElementById('post-meta').textContent=`${p.category} · ${p.date}`;document.getElementById('post-title').textContent=p.title;document.getElementById('post-lead').textContent=p.excerpt;document.getElementById('post-body').innerHTML=renderMarkdown(p.body);document.title=`${p.title} — blueming`;return;}
-      document.getElementById('featured').hidden=all;if(all){document.getElementById('edition-title').textContent='모든 글';document.getElementById('edition-copy').textContent='시간순으로 쌓이는 모든 기록입니다.';document.getElementById('entries').innerHTML=remote.map(item).join('');}else{const [first,...rest]=remote;document.getElementById('featured').innerHTML=first?`<a class="feature" href="?post=${encodeURIComponent(first.id)}"><div class="stamp"><b>${escapeHtml(first.category)}</b>${escapeHtml(first.date)}</div><div><h2>${escapeHtml(first.title)}</h2><p>${escapeHtml(first.excerpt)}</p></div></a>`:'';document.getElementById('entries').innerHTML=rest.map(item).join('');}document.getElementById('recent').innerHTML=remote.slice(0,3).map(p=>`<a class="mini" href="?post=${encodeURIComponent(p.id)}"><em>${escapeHtml(p.date)}</em>${escapeHtml(p.title)}</a>`).join('');
+      if(postId){
+        let p=remote.find(x=>String(x.id)===String(postId));
+        if(!p&&Number.isInteger(Number(postId))&&remote[Number(postId)])p=remote[Number(postId)];
+        if(p){
+          document.getElementById('home').hidden=true;
+          document.getElementById('post-view').hidden=false;
+          document.getElementById('post-meta').textContent=`${escapeHtml(p.category)} · ${escapeHtml(p.date)}`;
+          document.getElementById('post-title').textContent=p.title;
+          document.getElementById('post-lead').textContent=p.excerpt||'';
+          document.getElementById('post-body').innerHTML=renderMarkdown(p.body);
+          document.title=`${p.title} — blueming`;
+          return;
+        }
+      }
+      document.getElementById('home').hidden=false;
+      document.getElementById('post-view').hidden=true;
+      document.getElementById('featured').hidden=all;
+      if(all){
+        document.getElementById('edition-title').textContent='모든 글';
+        document.getElementById('edition-copy').textContent='시간순으로 쌓이는 모든 기록입니다.';
+        document.getElementById('entries').innerHTML=remote.map(item).join('');
+      }else{
+        const [first,...rest]=remote;
+        document.getElementById('featured').innerHTML=first?`<a class="feature" href="?post=${encodeURIComponent(first.id)}"><div class="stamp"><b>${escapeHtml(first.category)}</b>${escapeHtml(first.date)}</div><div><h2>${escapeHtml(first.title)}</h2><p>${escapeHtml(first.excerpt)}</p></div></a>`:'';
+        document.getElementById('entries').innerHTML=rest.map(item).join('');
+      }
+      document.getElementById('recent').innerHTML=remote.slice(0,3).map(p=>`<a class="mini" href="?post=${encodeURIComponent(p.id)}"><em>${escapeHtml(p.date)}</em>${escapeHtml(p.title)}</a>`).join('');
     }
     fetch('/api/posts',{cache:'no-store'}).then(r=>r.json()).then(data=>{if(Array.isArray(data.posts)&&data.posts.length)renderRemote(data.posts)}).catch(()=>{});
   </script>
